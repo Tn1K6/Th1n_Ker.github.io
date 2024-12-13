@@ -1,0 +1,816 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Th1n_Ker">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="前言最近学习了一下，有些地方可能还有不足，之后看看还有没有需要补充的地方。 常见攻击事件 Web入侵:网页挂马、主页篡改、webshell系统入侵、后台弱口令  系统入侵:病毒木马、勒索软件、远控后门、系统命令执行、反序列化漏洞 网络攻击:DDOS攻击、DNS劫持、ARP欺骗 排查思路 1.现场情况及线索收集 了解现场情况，确认被入侵主机   &#x3D;&#x3D;&#x3D;》确认多少台主机被入侵  确认入侵时间 了解现场">
+<meta property="og:type" content="article">
+<meta property="og:title" content="windwos入侵排查">
+<meta property="og:url" content="http://example.com/2024/12/13/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言最近学习了一下，有些地方可能还有不足，之后看看还有没有需要补充的地方。 常见攻击事件 Web入侵:网页挂马、主页篡改、webshell系统入侵、后台弱口令  系统入侵:病毒木马、勒索软件、远控后门、系统命令执行、反序列化漏洞 网络攻击:DDOS攻击、DNS劫持、ARP欺骗 排查思路 1.现场情况及线索收集 了解现场情况，确认被入侵主机   &#x3D;&#x3D;&#x3D;》确认多少台主机被入侵  确认入侵时间 了解现场">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/stm.jpg">
+<meta property="article:published_time" content="2024-12-13T04:51:45.000Z">
+<meta property="article:modified_time" content="2024-12-13T05:07:18.289Z">
+<meta property="article:author" content="Th1n_Ker">
+<meta property="article:tag" content="应急响应">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/stm.jpg">
+  
+  
+  
+  <title>windwos入侵排查 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":false,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":"BsziA1UcBtxARPC3IXbFc4Jm-gzGzoHsz","app_key":"EwKiJeIitpXRphq057k7iiU1","server_url":"https://bszia1uc.lc-cn-n1-shared.com","path":"window.location.pathname","ignore_local":true},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Th1n_Ker</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/ZX1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="windwos入侵排查"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-12-13 12:51" pubdate>
+          2024年12月13日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          23 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">windwos入侵排查</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>最近学习了一下，有些地方可能还有不足，之后看看还有没有需要补充的地方。</p>
+<h3 id="CpLVb">常见攻击事件</h3>
+Web入侵:网页挂马、主页篡改、webshell系统入侵、后台弱口令
+
+<p>系统入侵:病毒木马、勒索软件、远控后门、系统命令执行、反序列化漏洞</p>
+<p>网络攻击:DDOS攻击、DNS劫持、ARP欺骗</p>
+<h3 id="EjpZb">排查思路</h3>
+<h4 id="d9Zyo">1.现场情况及线索收集</h4>
+了解现场情况，确认被入侵主机   ===》确认多少台主机被入侵
+
+<p>确认入侵时间</p>
+<p>了解现场整体网络架构，初步判断入侵范围  &#x3D;&#x3D;&#x3D;》确认是否有防火墙，物理防火墙。是否有内外网分离</p>
+<h4 id="hH6yc">2.检查系统账号安全</h4>
+<h5 id="wLfql">(1、查看服务器是否有弱口令，远程管理端口是否对公网开放</h5>
+检查方法:
+
+<p>据实际情况咨询相关服务器管理员。</p>
+<h5 id="Dw1sy">(2、查看服务器是否存在可疑账号、新增账号</h5>
+检查方法:
+
+<p>打开cmd 窗口，输入lusrmgr.msc 命令，查看是否有新增&#x2F;可疑的账号，如有管理员群组 的(Administrators)里的新增账户请立即禁用或删除。</p>
+<p>我们通过net user test$ &#x2F;add 来添加账号，如果末尾添加$,说明这是一个隐藏账号，通过netuser 查看是无法发现隐藏账号的</p>
+<p><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/1.png" srcset="/img/loading.gif" lazyload></p>
+<h5 id="dihEs">(3、查看服务器是否存在隐藏账号、克隆账号</h5>
+检查方法: 
+
+<p>a、打开注册表，査看管理员对应键值 </p>
+<p><code>HKEY_LOCAL_MACHINE\SAM\SAM\Domains\Account\Users\Names</code></p>
+<p>b、使用D盾_web查杀工具，集成了对克隆账号检测的功能</p>
+<p><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/2.png" srcset="/img/loading.gif" lazyload></p>
+<h5 id="CHool">(4、结合日志，查看管理员登录时间、用户名是否存在异常 </h5>
+检查方法:
+
+<p>a、Win+R 打开运行，输入”eventvwr.msc”，回车运行，打开“事件查看器”。</p>
+<p><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/3.png" srcset="/img/loading.gif" lazyload></p>
+<h6 id="xKoD2">安全事件ID及常见场景:</h6>
+登录成功:4624
+
+<p>登录失败:4625</p>
+<p>注销成功:4634</p>
+<p>分配特殊权限:4672</p>
+<p>用户启动的注销:4647</p>
+<p>kerberos服务票据:4769</p>
+<p>kerberos身份验证:4768</p>
+<p>如果入侵者使用密码爆破，那会留下相当多的登录失败信息</p>
+<p><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/4.png" srcset="/img/loading.gif" lazyload></p>
+<h4 id="tZ6Ns">3.检查异常端口、进程</h4>
+<details class="lake-collapse"><summary id="uae038c3c"><span class="ne-text">特征如下</span></summary><h5 id="fqMBZ"><span class="ne-text">进程名称与路径</span></h5><ul class="ne-ul"><li id="u8a95c117" data-lake-index-type="0"><strong><span class="ne-text">陌生名称</span></strong><span class="ne-text">：进程名称难以归类为常见的用户或系统进程，或与正常的系统进程名称相似但存在细微差异，如将字母 “l” 与数字 “1” 混淆等，这类不常见或伪装的名称需引起警惕</span></li><li id="ubff13739" data-lake-index-type="0"><strong><span class="ne-text">非标准路径</span></strong><span class="ne-text">：正常的系统进程和大多数正规应用程序通常位于系统默认的安装目录或特定的程序文件夹中。若进程的路径指向临时文件夹、用户的个人文件夹深处，或其他不常见的系统目录，如 “C:\Windows\Temp\”、“C:\Users\ 用户名 \AppData\Roaming\” 下的不明文件夹，可能存在问题</span></li></ul><h5 id="IlTeO"><span class="ne-text">进程属性</span></h5><ul class="ne-ul"><li id="ua72e7762" data-lake-index-type="0"><strong><span class="ne-text">无图标、版本及描述信息</span></strong><span class="ne-text">：正规的软件通常会有相应的图标、版本号以及对自身功能的描述等信息，而可疑进程往往缺少这些关键细节，显得信息不完整</span></li><li id="u65b4ee51" data-lake-index-type="0"><strong><span class="ne-text">数字签名异常</span></strong><span class="ne-text">：正规的软件一般都有有效的数字签名，且签名与发布者信息相符。若进程没有数字签名，或者签名与声称的发布者不匹配、签名已损坏等，都可能意味着该进程是非法或被篡改过的</span></li></ul><h5 id="o3kaP"><span class="ne-text">资源占用情况</span></h5><ul class="ne-ul"><li id="u2238df22" data-lake-index-type="0"><strong><span class="ne-text">CPU 使用率过高</span></strong><span class="ne-text">：如挖矿病毒等恶意程序，会大量占用 CPU 资源，导致系统运行缓慢。若某个进程长时间占用较高比例的 CPU 使用率，且该进程并非用户主动运行的已知高 CPU 占用程序，如大型游戏、专业设计软件等，就需要进一步排查</span></li><li id="u655f055b" data-lake-index-type="0"><strong><span class="ne-text">内存占用异常</span></strong><span class="ne-text">：部分可疑进程会不断申请大量内存，导致系统可用内存逐渐减少，甚至出现内存泄漏的情况，使系统出现卡顿、死机等现象.</span></li></ul><h5 id="lop4S"><span class="ne-text">进程行为</span></h5><ul class="ne-ul"><li id="u6a59c3ee" data-lake-index-type="0"><strong><span class="ne-text">频繁的网络活动</span></strong><span class="ne-text">：正常进程在不需要网络连接时通常不会主动进行大量网络通信。若发现某个进程频繁地与外部网络地址建立连接，尤其是连接到一些可疑的 IP 地址或域名，或者在后台偷偷上传、下载大量数据，很可能是可疑进程</span></li><li id="u95ef3064" data-lake-index-type="0"><strong><span class="ne-text">异常的父进程与子进程关系</span></strong><span class="ne-text">：正常情况下，进程的启动和父子进程关系是有一定规律的。例如，系统的关键服务进程通常由特定的系统进程启动，而用户运行的应用程序则由资源管理器等常规进程启动。若发现某个进程的父进程异常，或者子进程的行为与其父进程的功能不相符，可能存在恶意行为.</span></li></ul></details>
+<h5 id="mKWd3">检查网络连接情况，是否有远程连接、可疑连接</h5>
+<h6 id="zIRO2">检查方法1: </h6>
+使用 netstat -ano 命令查看目前的网络连接，定位可疑的 ESTABLISHED
+
+
+
+<p>ESTABLISHED:完成连接并正在进行数据通信的状态。</p>
+<p>LISTENING:表示处于侦听状态，就是说该端口是开放的，等待连接，但还没有被连接</p>
+<p>CLOSE WAIT:对方主动关闭连接或者网络异常导致连接中断。</p>
+<p>TIME WAIT:我方主动调用close()断开连接，收到对方确认后状态变为TIME WAIT,</p>
+<p>查看目前的网络连接，定位可疑的   <font style="background-color:#FBDE28;">ESTABLISHED</font><font style="background-color:#FFFFFF;">    前期对业务进行了解和咨询后，确定这些IP是否是正常的,对异常的PID进行反查。 </font></p>
+<p><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/5.png" srcset="/img/loading.gif" lazyload></p>
+<p>根据 netstat 命令定位出的 PID 编号，再通过 tasklist 命令进行进程定位 tasklist</p>
+<p>findstr “PlD” </p>
+<p><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/6.png" srcset="/img/loading.gif" lazyload></p>
+<p>看看执行程序是否是少见的，看起来不正常的</p>
+<h6 id="gSRqx">检查方法2: </h6>
+开始--运行 --输入 msinfo32 命令，"软件环境 --正在运行任务"就可以依次点击查看到进程的详 细信息，比如进程路径、进程ID、文件创建日期以及启动时间等。
+
+<p><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/7.png" srcset="/img/loading.gif" lazyload></p>
+<p>当发现异常的进程名称的时候在这里得知软件启动时间，<font style="background-color:#FFFFFF;">和入侵时间进行比对</font>。</p>
+<h4 id="YMLNG">4.检查启动项、计划任务、服务</h4>
+<h5 id="B5d98">开机启动项</h5>
+可以通过msconfig查看启动项，win10系统的启动项转移到任务管理器中查看了
+
+<p>（像勒索病毒会遇到）</p>
+<p>查看是否存在可疑项</p>
+<p><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/8.png" srcset="/img/loading.gif" lazyload></p>
+<h5 id="emRAt">查看缓存文件</h5>
+C盘一般在C:/Windows/Temp，这些都是Windows产生的临时文件。
+
+<p>比如:WinRAR等压缩工具对压缩包进行解压的时候会先解压在临时文件夹中，然后从这个临时文件夹中移动到目标文件夹。</p>
+<h5 id="JAVOM">Recent系统文件夹</h5>
+Recent里面存放着最近使用的文档快捷方式，可以看到近期修改的文件以及修改日期打开方式:WIN+R->%UserProfile%\Recent
+
+<p><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/9.png" srcset="/img/loading.gif" lazyload><br><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/10.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>根据文件的访问时间顺序和文件类型，可以大致勾勒出攻击者在系统中的活动路径和操作流程，攻击类型。</p>
+</blockquote>
+<h4 id="UcktZ">5.Windows日志分析</h4>
+<h5 id="RZ7GU">window日志分为系统日志，应用程序日志和安全日志。在应急溯源中，重点关注安全日志</h5>
+日志默认保存位置
+
+<p>系统日志:C:\Windows\System32\winevt\Logs\System.evtx</p>
+<p>应用程序日志:C:\Windows\System32\winevt\Logs\Application.evtx</p>
+<p>安全日志:C:\Windows\System32\winevt\Logs\Security.evtx</p>
+<h5 id="ivTXM">Windows事件日志主要有以下五种事件类型：</h5>
+<h6 id="NMukm">信息（Information）</h6>
++ **定义**：记录系统或应用程序正常运行时的一些基本状态和操作信息，这些信息通常用于提供系统运行的详细情况，帮助用户和管理员了解系统的日常活动。
++ **示例**：系统启动和关闭的记录、服务的启动和停止、应用程序的正常运行状态更新等。如“Windows 已成功启动”“服务‘Windows Update’已启动”等。
+
+<h6 id="OiXVa">警告（Warning）</h6>
++ **定义**：表示系统或应用程序出现了一些可能会影响正常运行的情况，但目前尚未导致严重问题，通常是一种需要引起注意的提示性信息。
++ **示例**：磁盘空间不足、系统资源使用接近阈值、网络连接出现短暂中断等。如“可用磁盘空间低于10%”“CPU使用率持续超过80%达5分钟”等。
+
+<h6 id="bcDL7">错误（Error）</h6>
++ **定义**：表明系统或应用程序在运行过程中发生了错误，导致某个操作或功能未能正常完成，可能会对系统的正常运行产生一定的影响。
++ **示例**：应用程序崩溃、驱动程序故障、系统服务无法启动、硬件设备出现问题等。如“应用程序‘XXX.exe’已停止工作”“无法加载设备驱动程序‘XXX.sys’”等。
+
+<h6 id="Av4lJ">成功审核（Success Audit）</h6>
++ **定义**：主要用于记录用户或系统成功完成的一些需要审核的操作，这些操作通常与系统的安全性和权限管理相关，有助于管理员了解系统的安全状态和用户的操作行为。
++ **示例**：用户成功登录系统、成功访问某个敏感资源、成功执行某个特权操作等。如“用户‘Administrator’成功登录到本地系统”“用户‘XXX’成功访问了‘C:\Windows\System32\config’文件夹”等。
+
+<h6 id="CWA23">失败审核（Failure Audit）</h6>
++ **定义**：记录用户或系统尝试执行某个操作但未成功的情况，通常与权限不足、认证失败、资源访问被拒绝等安全相关问题有关，可帮助管理员发现潜在的安全威胁和非法操作。
++ **示例**：用户登录失败、访问资源被拒绝、权限不足导致操作失败等。如“用户‘XXX’登录失败，原因是用户名或密码错误”“用户‘XXX’试图访问‘C:\Windows\System32\config’文件夹，但被拒绝访问”等。
++ 
+
+<h5 id="ph5eI">window安全日志分析的常用手法</h5>
+一般是在事件查看其中，对日志时间ID进行筛选。比如在勒索病毒的应急响应中，我们通过事件ID-4624对登录成功的日志进行筛选，因为勒索病毒一般是通过RDP爆破的方式进行传播的，所以<font style="color:#000000;background-color:#ECAA04;">我们重点关注登录类型为10(远程交互)的登陆成功的日志</font>，重点关注登录成功的时间与勒索病毒加密文件的时间是否对应，如下图
+
+<p><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/10.png" srcset="/img/loading.gif" lazyload></p>
+<h4 id="m7aSJ">思维导图</h4>
+
+<p><img src="/img/windows%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5/11.png" srcset="/img/loading.gif" lazyload></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94/" class="print-no-link">#应急响应</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>windwos入侵排查</div>
+      <div>http://example.com/2024/12/13/windows入侵排查/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Th1n_Ker</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年12月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/11/18/2024%E6%95%B0%E8%AF%81%E6%9D%AF-%E5%88%9D%E8%B5%9BWP%5B%E8%AE%A1%E7%AE%97%E6%9C%BA%E3%80%81U%E7%9B%98%E3%80%81%E6%89%8B%E6%9C%BA%5D/" title="2024数证杯-初赛WP[计算机、U盘、手机]">
+                        <span class="hidden-mobile">2024数证杯-初赛WP[计算机、U盘、手机]</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
